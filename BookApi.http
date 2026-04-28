@@ -1,0 +1,361 @@
+@BookApi_HostAddress = http://localhost:5280
+
+### ─── BOOKS CRUD ─────────────────────────────────────
+
+### Get all books
+GET {{BookApi_HostAddress}}/api/books
+Accept: application/json
+
+###
+
+### Get book 1 (1984 - seeded)
+GET {{BookApi_HostAddress}}/api/books/1
+Accept: application/json
+
+###
+
+### Get book 2 (Brave New World - seeded)
+GET {{BookApi_HostAddress}}/api/books/2
+Accept: application/json
+
+###
+
+### Create a book with ONE author
+POST {{BookApi_HostAddress}}/api/books
+Content-Type: application/json
+
+{
+  "title": "Animal Farm",
+  "year": 1945,
+  "authorIds": [1]
+}
+
+###
+
+### Create a book with TWO authors (many to many)
+POST {{BookApi_HostAddress}}/api/books
+Content-Type: application/json
+
+{
+  "title": "Co-authored Book",
+  "year": 2024,
+  "authorIds": [1, 2]
+}
+
+###
+
+### Verify co-authored book has both authors
+GET {{BookApi_HostAddress}}/api/books/4
+Accept: application/json
+
+###
+
+### Update a book
+PUT {{BookApi_HostAddress}}/api/books/4
+Content-Type: application/json
+
+{
+  "title": "Co-authored Book (Updated)",
+  "year": 2025
+}
+
+###
+
+### Verify update
+GET {{BookApi_HostAddress}}/api/books/4
+Accept: application/json
+
+###
+
+### Delete a book
+DELETE {{BookApi_HostAddress}}/api/books/4
+Accept: application/json
+
+###
+
+### Verify book deleted (should return 404)
+GET {{BookApi_HostAddress}}/api/books/4
+Accept: application/json
+
+###
+
+### ─── AUTHORS CRUD ────────────────────────────────────
+
+### Get all authors
+GET {{BookApi_HostAddress}}/api/authors
+Accept: application/json
+
+###
+
+### Get author 1 (George Orwell - seeded)
+GET {{BookApi_HostAddress}}/api/authors/1
+Accept: application/json
+
+###
+
+### Get author 2 (Aldous Huxley - seeded)
+GET {{BookApi_HostAddress}}/api/authors/2
+Accept: application/json
+
+###
+
+### Create author 3
+POST {{BookApi_HostAddress}}/api/authors
+Content-Type: application/json
+
+{
+  "name": "Fyodor Dostoevsky",
+  "country": "Russia"
+}
+
+###
+
+### Create author 4
+POST {{BookApi_HostAddress}}/api/authors
+Content-Type: application/json
+
+{
+  "name": "Leo Tolstoy",
+  "country": "Russia"
+}
+
+###
+
+### Create author 5
+POST {{BookApi_HostAddress}}/api/authors
+Content-Type: application/json
+
+{
+  "name": "Franz Kafka",
+  "country": "Czech"
+}
+
+###
+
+### Delete an author
+DELETE {{BookApi_HostAddress}}/api/authors/5
+Accept: application/json
+
+###
+
+### Verify author deleted (should return 404)
+GET {{BookApi_HostAddress}}/api/authors/5
+Accept: application/json
+
+###
+
+### ─── MANY TO MANY - BASIC ───────────────────────────
+
+### Get all books by author 1
+GET {{BookApi_HostAddress}}/api/books/by-author/1
+Accept: application/json
+
+###
+
+### Get all books by author 2
+GET {{BookApi_HostAddress}}/api/books/by-author/2
+Accept: application/json
+
+###
+
+### Create book shared by both seeded authors
+POST {{BookApi_HostAddress}}/api/books
+Content-Type: application/json
+
+{
+  "title": "Shared World",
+  "year": 2023,
+  "authorIds": [1, 2]
+}
+
+###
+
+### Author 1 should show shared book in their list
+GET {{BookApi_HostAddress}}/api/authors/1
+Accept: application/json
+
+###
+
+### Author 2 should also show shared book
+GET {{BookApi_HostAddress}}/api/authors/2
+Accept: application/json
+
+###
+
+### ─── MANY TO MANY - VOLUME ──────────────────────────
+
+### Create book with 3 authors
+POST {{BookApi_HostAddress}}/api/books
+Content-Type: application/json
+
+{
+  "title": "Three Authors Book",
+  "year": 2023,
+  "authorIds": [1, 2, 3]
+}
+
+###
+
+### Create book with 4 authors
+POST {{BookApi_HostAddress}}/api/books
+Content-Type: application/json
+
+{
+  "title": "Four Authors Book",
+  "year": 2023,
+  "authorIds": [1, 2, 3, 4]
+}
+
+###
+
+### Verify 4 authors appear on book
+GET {{BookApi_HostAddress}}/api/books/by-author/4
+Accept: application/json
+
+###
+
+### ─── MANY TO MANY - EDGE CASES ─────────────────────
+
+### Create book with NO authors (empty array)
+POST {{BookApi_HostAddress}}/api/books
+Content-Type: application/json
+
+{
+  "title": "Orphan Book",
+  "year": 2020,
+  "authorIds": []
+}
+
+###
+
+### Create book with non-existent authorId (should fail gracefully)
+POST {{BookApi_HostAddress}}/api/books
+Content-Type: application/json
+
+{
+  "title": "Ghost Author Book",
+  "year": 2021,
+  "authorIds": [999]
+}
+
+###
+
+### Create book with duplicate authorIds (same author twice)
+POST {{BookApi_HostAddress}}/api/books
+Content-Type: application/json
+
+{
+  "title": "Duplicate Author Test",
+  "year": 2022,
+  "authorIds": [1, 1]
+}
+
+###
+
+### ─── MANY TO MANY - RELATIONSHIP INTEGRITY ─────────
+
+### Create book linked to authors 3 and 4
+POST {{BookApi_HostAddress}}/api/books
+Content-Type: application/json
+
+{
+  "title": "Book To Delete Author From",
+  "year": 2022,
+  "authorIds": [3, 4]
+}
+
+###
+
+### Confirm book linked to author 3
+GET {{BookApi_HostAddress}}/api/books/by-author/3
+Accept: application/json
+
+###
+
+### Confirm book linked to author 4
+GET {{BookApi_HostAddress}}/api/books/by-author/4
+Accept: application/json
+
+###
+
+### Delete author 3 (cascade removes BookAuthor rows)
+DELETE {{BookApi_HostAddress}}/api/authors/3
+Accept: application/json
+
+###
+
+### Books by author 3 should now be empty
+GET {{BookApi_HostAddress}}/api/books/by-author/3
+Accept: application/json
+
+###
+
+### Author 4 should still be linked (not affected by author 3 delete)
+GET {{BookApi_HostAddress}}/api/books/by-author/4
+Accept: application/json
+
+###
+
+### ─── MANY TO MANY - CASCADE DELETE BOOK ────────────
+
+### Create book linked to authors 4 and 5
+POST {{BookApi_HostAddress}}/api/books
+Content-Type: application/json
+
+{
+  "title": "Last Book Before Delete",
+  "year": 2024,
+  "authorIds": [4, 5]
+}
+
+###
+
+### Confirm book linked to author 4
+GET {{BookApi_HostAddress}}/api/books/by-author/4
+Accept: application/json
+
+###
+
+### Delete the book (BookAuthor rows should cascade delete)
+DELETE {{BookApi_HostAddress}}/api/books/9
+Accept: application/json
+
+###
+
+### Author 4 still exists but that book gone from their list
+GET {{BookApi_HostAddress}}/api/authors/4
+Accept: application/json
+
+###
+
+### Author 5 same check
+GET {{BookApi_HostAddress}}/api/authors/5
+Accept: application/json
+
+###
+
+### ─── CROSS REFERENCE FINAL CHECK ───────────────────
+
+### Author 1 - should appear in many books
+GET {{BookApi_HostAddress}}/api/authors/1
+Accept: application/json
+
+###
+
+### Author 2 - same
+GET {{BookApi_HostAddress}}/api/authors/2
+Accept: application/json
+
+###
+
+### Full books list - verify all authors arrays populated
+GET {{BookApi_HostAddress}}/api/books
+Accept: application/json
+
+###
+
+### Full authors list - verify all bookTitles arrays populated
+GET {{BookApi_HostAddress}}/api/authors
+Accept: application/json
+
+###
