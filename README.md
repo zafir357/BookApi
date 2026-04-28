@@ -334,16 +334,6 @@ git add .
 git commit -m "feat: add migration DescribeYourChange"
 git push
 ```
-
----
-
-## Seed Data
-
-The database is seeded automatically with:
-
-- **Authors:** George Orwell (UK), Aldous Huxley (UK)
-- **Books:** 1984 (1949) → Orwell, Brave New World (1932) → Huxley
-
 ---
 
 ## Many-to-Many Test Scenario
