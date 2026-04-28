@@ -107,8 +107,6 @@ mapper.Map(dto, book); // 2-arg: mutates tracked entity
 await db.SaveChangesAsync(); // fires UPDATE SQL
 ```
 
-The two-argument `mapper.Map(dto, book)` mutates the existing tracked entity in place. EF Core detects the changes and generates a targeted `UPDATE` statement.
-
 ---
 
 ## AutoMapper Profile
@@ -161,26 +159,187 @@ CreateMap<CreateAuthorDto, Author>();
 
 ---
 
-## Running Locally
+## Prerequisites
 
 ```bash
-# Install dependencies
-dotnet restore
+# Check .NET version (needs 8+)
+dotnet --version
 
-# Apply migrations and seed data
+# Install EF Core CLI tools globally (once)
+dotnet tool install --global dotnet-ef
+
+# Verify EF tools installed
+dotnet ef --version
+```
+
+---
+
+## Installation
+
+```bash
+# Clone the repo
+git clone https://github.com/YOUR_USERNAME/BookApi.git
+cd BookApi
+
+# Restore all NuGet packages
+dotnet restore
+```
+
+---
+
+## Database Setup
+
+```bash
+# Create the migration (only needed if no Migrations/ folder)
+dotnet ef migrations add InitialCreate
+
+# Apply migrations + create bookapi.db + run seed data
 dotnet ef database update
 
-# Run the API
+# Verify the database was created
+ls *.db
+```
+
+> Seed data is applied automatically via `HasData()` in `AppDbContext.OnModelCreating`.
+> The database is also auto-migrated on every `dotnet run` via `db.Database.Migrate()` in `Program.cs`.
+
+---
+
+## Running the API
+
+```bash
+# Run in development mode
+dotnet run
+
+# Run and watch for file changes (auto-restart on save)
+dotnet watch run
+
+# Run on a specific port
+dotnet run --urls "http://localhost:5280"
+
+# Run in production mode
+dotnet run --environment Production
+```
+
+Open Swagger UI at:
+```
+http://localhost:5280/swagger
+```
+
+---
+
+## Migrations
+
+```bash
+# Create a new migration after changing a model
+dotnet ef migrations add YourMigrationName
+
+# Apply pending migrations to the database
+dotnet ef database update
+
+# Rollback to a specific migration
+dotnet ef database update MigrationName
+
+# Rollback all migrations (empty database)
+dotnet ef database update 0
+
+# Remove the last migration (if not yet applied)
+dotnet ef migrations remove
+
+# List all migrations and their status
+dotnet ef migrations list
+
+# Generate SQL script for a migration (useful for production)
+dotnet ef script
+```
+
+---
+
+## Reset the Database
+
+```bash
+# Delete the local database file
+rm bookapi.db
+
+# Recreate it with seed data
+dotnet ef database update
+
+# Or simply run the app — it auto-migrates on startup
 dotnet run
 ```
 
-Open Swagger UI at `http://localhost:5280/swagger`
+---
+
+## Build & Publish
+
+```bash
+# Build and check for errors
+dotnet build
+
+# Build in release mode
+dotnet build --configuration Release
+
+# Publish for deployment
+dotnet publish --configuration Release --output ./publish
+
+# Run the published version
+dotnet ./publish/BookApi.dll
+```
+
+---
+
+## NuGet Packages
+
+```bash
+# List installed packages
+dotnet list package
+
+# Add a package
+dotnet add package PackageName
+
+# Remove a package
+dotnet remove package PackageName
+
+# Update all packages
+dotnet restore
+
+# Check for outdated packages
+dotnet list package --outdated
+```
+
+---
+
+## Git Workflow
+
+```bash
+# Initial setup (first time only)
+git init
+dotnet new gitignore
+git add .
+git commit -m "feat: initial BookApi"
+git remote add origin https://github.com/YOUR_USERNAME/BookApi.git
+git branch -M main
+git push -u origin main
+
+# Daily workflow
+git status
+git add .
+git commit -m "feat: your message here"
+git push
+
+# After adding a new model or changing schema
+dotnet ef migrations add DescribeYourChange
+dotnet ef database update
+git add .
+git commit -m "feat: add migration DescribeYourChange"
+git push
+```
 
 ---
 
 ## Seed Data
 
-The database is seeded with:
+The database is seeded automatically with:
 
 - **Authors:** George Orwell (UK), Aldous Huxley (UK)
 - **Books:** 1984 (1949) → Orwell, Brave New World (1932) → Huxley
@@ -207,4 +366,33 @@ The database is seeded with:
     { "id": 2, "name": "Aldous Huxley" }
   ]
 }
+```
+
+---
+
+## Project Structure
+
+```
+BookApi/
+├── Controllers/
+│   ├── BooksController.cs
+│   └── AuthorsController.cs
+├── Data/
+│   └── AppDbContext.cs
+├── DTOs/
+│   ├── BookDto.cs
+│   └── AuthorDto.cs
+├── Mappings/
+│   └── MappingProfile.cs
+├── Models/
+│   ├── Author.cs
+│   ├── Book.cs
+│   └── BookAuthor.cs
+├── Migrations/
+├── Properties/
+│   └── launchSettings.json
+├── bookapi.db
+├── BookApi.http
+├── BookApi.csproj
+└── Program.cs
 ```
